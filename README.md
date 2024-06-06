@@ -14,7 +14,6 @@ The Script uses the following:
 
 - *[Python 3.12.3](https://www.python.org/downloads/release/python-3123/)* as the primary Programming Language.
 - *[Visual Studio Code](https://code.visualstudio.com/download)* as the IDE.
-- *[Cloudflare V4 Zone entrypoint HTTP firewall request Check](https://developers.cloudflare.com/api/operations/getZoneEntrypointRuleset)* as the secondary endpoint for WAF Authorization header.
 - *[Cloudflare V4 Zone list Check](https://developers.cloudflare.com/api/operations/zones-get)* as the primary endpoint for zone Authorization header.
 - *[Requests Module](https://pypi.org/project/requests/)* allows us to make HTTP/1.1 request calls.
 - *[Datetime Module](https://docs.python.org/3/library/datetime.html)* for usage of current date and time on file naming schemes
