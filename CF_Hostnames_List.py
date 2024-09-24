@@ -7,10 +7,10 @@ import os
 # Create a session to reuse HTTP connections
 session = requests.Session()
 
-def get_zones(api_token, account_name, page, per_page):
+def get_zones(api_key, account_name, page, per_page):
     url = "https://api.cloudflare.com/client/v4/zones"
     headers = {
-        "Authorization": f"Bearer {api_token}",
+        "Authorization": f"Bearer {api_key}",
     }
     params = {
         "page": page,
@@ -40,7 +40,7 @@ def write_hostnames_to_csv(dxp_zones):
             print(f"Hostname: {zone['name']}")
 
 # Example usage
-api_token = os.getenv('API_TOKEN')
+api_key = os.getenv('API_KEY')
 account_name = os.getenv('ACCOUNT_NAME')  # Get account name from environment variable
 
 page = 1
@@ -49,7 +49,7 @@ retry_delay = 1  # Initial delay time
 all_dxp_zones = []
 
 while True:
-    success, zones = get_zones(api_token, account_name, page, per_page)
+    success, zones = get_zones(api_key, account_name, page, per_page)
     if success:
         if zones:
             all_dxp_zones.extend(zones)
