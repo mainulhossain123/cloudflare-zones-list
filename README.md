@@ -1,67 +1,101 @@
-# Cloudflare_Zones_List_Extraction
-Simple Python script for extracting a list of all Cloudflare zones, generating output to a CSV file
+# Cloudflare DXP Hostname Exporter
 
-## Prerequisites 
-* **Python 3.12 or higher**. Download it from https://www.python.org/downloads/
-* **IDE** - I personally used Visual Studio Code but it is upto your preference.
-* **Libraries - requests**: Run in Terminal of enviornment or in command prompt **pip install requests**
-* **Libraries - datetime**: Run in Terminal of enviornment or in command prompt **pip install datetime**
-* **Libraries - csv**: Run in Terminal of enviornment or in command prompt **pip install csv**
-* **Cloudflare API Key**. You must have the API key enabled with minimum Read permissions from your Cloudflare account.
+This script fetches all zone names (hostnames) from a Cloudflare account filtered by account name and saves them into a CSV file. It is ideal for auditing or reporting hostnames associated with a Digital Experience Platform (DXP) or similar services.
 
-## Languages, Frameworks and API calls used in the script
-The Script uses the following:
+---
 
-- *[Python 3.12.3](https://www.python.org/downloads/release/python-3123/)* as the primary Programming Language.
-- *[Visual Studio Code](https://code.visualstudio.com/download)* as the IDE.
-- *[Cloudflare V4 Zone list Check](https://developers.cloudflare.com/api/operations/zones-get)* as the primary endpoint for zone Authorization header.
-- *[Requests Module](https://pypi.org/project/requests/)* allows us to make HTTP/1.1 request calls.
-- *[Datetime Module](https://docs.python.org/3/library/datetime.html)* for usage of current date and time on file naming schemes
-- *[Time Module](https://docs.python.org/3/library/time.html)* primarily used in the script to produce delays in the frequency of each request in case of rate-limiting issues
-- *[CSV Module](https://docs.python.org/3/library/csv.html)* allows us to write or read CSV files, in this case write all retrieved data to a CSV file.
+## 📦 Features
 
-## Legal
-* This code is in no way affiliated with, authorized, maintained, sponsored or endorsed by Cloudflare or any of its affiliates or subsidiaries. This is an independent and unofficial software. Use at your own risk. Commercial use of this code/repo is strictly prohibited.
+- Authenticates via Cloudflare API token.
 
-## Basic Usage
+- Filters zones by Cloudflare account name.
 
-### API_Key Replacement
-Simply replace the value in **api_key** with your own API key and run the script. 
+- Outputs zone hostnames to a timestamped CSV file.
 
-#Set your Cloudflare API key
-```
-api_key = 'YOUR_API_KEY'
-```
+- Handles pagination automatically.
 
-### User Input
-If you have multiple accounts in your Cloudflare account then you can set up a parameter below in **ZN_zones** to include the parent sub account name under which all the zones you wish to get the list for. enter in **zone['account']['name'] == 'Input your account you wish to download'**
-```python
-for _ in range(retries):
-        response = session.get(url, headers=headers, params=params)
-        if response.status_code == 200:
-            data = response.json()
-            if data['success'] and data['result']:
-                # Filter zones for only DXP customers
-                ZN_zones = [zone for zone in data['result'] if zone['account']['name'] == 'Input your account you wish to download']
-                return True, ZN_zones
-        else:
-            print("Failed to fetch zones:", response.text)
-            time.sleep(5)  # Wait for 5 seconds before retrying
-    return False, None
+- Retries on failure with exponential backoff.
+
+---
+
+## ⚙️ Requirements
+- Python 3.7+
+
+- requests library (install via pip install requests)
+
+---
+
+## 🔑 Environment Variables
+Set the following environment variables before running the script:
+
+| Variable       | Description                                        | Required |
+| -------------- | -------------------------------------------------- | -------- |
+| `API_KEY`      | Cloudflare API token with permission to list zones | ✅ Yes    |
+| `ACCOUNT_NAME` | Name of the Cloudflare account to filter zones     | ✅ Yes    |
+
+---
+
+## 🚀 Usage
+
+```bash
+# Set environment variables
+export API_KEY="your_cloudflare_api_token"
+export ACCOUNT_NAME="your_account_name"
+
+# Run the script
+python cf_dxp_hostnames_export.py
 ```
 
-### Extracted data and CSV File
-The data will be saved in a CSV file **customer_hostnames_{current_date}.csv**, which you can change to your desire and also include a path for saving if you wish but by default. For the current code the following information below are being written over to the CSV file as shown below. The print statements are there simply for showing progress of the code.
-```python
-ef write_hostnames_to_csv(ZN_zones):
-    current_date = datetime.now().strftime("%Y-%m-%d")
-    filename = f'customer_hostnames_{current_date}.csv'
-    with open(filename, mode='a', newline='') as file:  # Change 'w' to 'a' to append data to the file
-        writer = csv.writer(file)
-        for zone in ZN_zones:
-            writer.writerow([zone['name']])
-            print(f"Hostname: {zone['name']}")
+## 📄 Output
+The script creates a CSV file in the current directory with the following naming convention:
+
+```css
+dxp_customer_hostnames_YYYY-MM-DD.csv
+```
+Each row in the CSV contains a zone (hostname) under the specified Cloudflare account:
+| Hostname         |
+| ---------------- |
+| example.com      |
+| sub.example.org  |
+| customer.site.io |
+---
+
+## 🔁 Pagination & Retry Logic
+- Handles pagination using the page and per_page parameters (fetches up to 1000 zones per request).
+
+- If a request fails, the script waits and retries up to a maximum delay of 60 seconds using exponential backoff.
+
+## 🐳 Docker-Friendly
+The script does not write outside the current working directory and only depends on environment variables—making it container-ready.
+
+## 📘 Example .env File
+You can use a .env file with the following content:
+```env
+API_KEY=your_cloudflare_api_token
+ACCOUNT_NAME=your_account_name
+```
+Then load the environment and run the script:
+```bash
+source .env
+python cf_dxp_hostnames_export.py
 ```
 
-### Disclaimer
-- I have not used multi-threading in this script unlike previous scripts as due to varying number of zones and dataset size, Cloudflare has a tendency to run into ratelimiting issues, particularly with multi-threading for multiple requests, which was causing loss of data.
+## 📬 Notes
+- Make sure your API token has permissions to list zones under the specified account.
+
+- Duplicate entries are not removed—consider post-processing if needed.
+
+## 🤝 Contributing
+Pull requests are welcome. For major changes:
+* Fork the repo
+* Create a feature branch
+* Test your changes
+* ubmit a PR with context
+
+## 📝 License
+This project is licensed under the MIT License
+
+## 📬 Contact
+For issues, questions, or feature requests, please contact:
+Author: Mainul Hossain
+Email: hossainmainul83@gmail.com
